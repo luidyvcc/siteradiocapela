@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rádio Capela</title>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <audio id="radio" src="https://sv10.hdradios.net:14720/stream" preload="auto" playsinline></audio>
+
+        <!-- Modal de controle (aparece apenas quando necessário) -->
+        <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-label="Controles de áudio">
+          <div class="modal-content">
+            <img src="radio_capela.png" alt="Rádio Capela" class="modal-logo">
+             <h2 class="modal-title">Toque no botão abaixo para iniciar a reprodução ou ativar o som.</h2>
+             <div class="modal-actions">
+               <button id="playBtn" class="control-btn" aria-label="Tocar rádio">
+                 <!-- ícone play carregado de arquivo externo -->
+                 <img src="icons/icon_play.svg" class="play-icon" alt="Play">
+                 <span class="btn-label">Ouvir Rádio Capela</span>
+               </button>
+             </div>
+           </div>
+        </div>
+
+        <img src="radio_capela.png" alt="Rádio Capela" class="logo">
+    </div>
+
+    <script>
+      // tenta autoplay depois que a página carregar; fallback para "muted" ou mostrar modal
+      document.addEventListener('DOMContentLoaded', () => {
+        const audio = document.getElementById('radio');
+        const playBtn = document.getElementById('playBtn');
+        const modal = document.getElementById('modal');
+
+        function showModal() {
+          modal.classList.add('visible');
+          modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function hideModal() {
+          modal.classList.remove('visible');
+          modal.setAttribute('aria-hidden', 'true');
+        }
+
+        async function attemptPlay() {
+          try {
+            await audio.play();
+            hideModal();
+          } catch (err) {
+            // autoplay com som bloqueado -> tenta autoplay mudo
+            audio.muted = true;
+            try {
+              await audio.play();
+              // tocando, mas mudo: mostra modal para o usuário ativar som
+              showModal();
+            } catch (err2) {
+              // autoplay totalmente bloqueado -> mostra modal para o usuário iniciar
+              showModal();
+            }
+          }
+        }
+
+        playBtn.addEventListener('click', async () => {
+          // ao clicar: desmutar e garantir que esteja tocando; então fechar modal
+          audio.muted = false;
+          try {
+            await audio.play();
+          } catch (e) {
+            console.error('Erro ao iniciar/ativar áudio:', e);
+          } finally {
+            hideModal();
+          }
+        });
+
+        attemptPlay();
+      });
+    </script>
+</body>
+
+</html>
